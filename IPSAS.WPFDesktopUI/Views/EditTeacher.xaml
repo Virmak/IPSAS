@@ -1,0 +1,130 @@
+﻿<Window x:Class="IPSAS.WPFDesktopUI.Views.EditTeacher"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IPSAS.WPFDesktopUI.Views"
+        mc:Ignorable="d"
+        Title="Enseignant | Modifier" Height="370"  Width="800"
+        Closing="Window_Closing">
+    <Border Padding="10">
+        <DockPanel VerticalAlignment="Top">
+            <TextBlock DockPanel.Dock="Top" Text="Modifier Enseignant" FontWeight="Bold" Margin="0 10"></TextBlock>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" DockPanel.Dock="Top" Margin="0 0 5 0">
+                    <TextBlock Text="Matricule"></TextBlock>
+                    <TextBox Text="" IsEnabled="False" Padding="2"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" DockPanel.Dock="Top" Margin="5 0 0 0">
+                    <TextBlock Text="N° CIN"></TextBlock>
+                    <TextBox Text="{Binding Path=CIN,Mode=TwoWay}" Padding="2"></TextBox>
+                </StackPanel>
+            </Grid>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" DockPanel.Dock="Top" Margin="0 0 5 0">
+                    <TextBlock Text="Nom"></TextBlock>
+                    <TextBox Text="{Binding Path=LastName,Mode=TwoWay}" Padding="2" ></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" DockPanel.Dock="Top" Margin="5 0 0 0">
+                    <TextBlock Text="Prénom"></TextBlock>
+                    <TextBox Text="{Binding Path=FirstName,Mode=TwoWay}" Padding="2"></TextBox>
+                </StackPanel>
+            </Grid>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" DockPanel.Dock="Top" Margin="0 0 5 0">
+                    <TextBlock Text="N° Téléphone"></TextBlock>
+                    <TextBox Text="{Binding Path=Phone,Mode=TwoWay}" Padding="2"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" DockPanel.Dock="Top" Margin="5 0 0 0">
+                    <TextBlock Text="Date de naissance"></TextBlock>
+                    <DatePicker  Text="{Binding Path=BirthDate,Mode=TwoWay}" Padding="2"></DatePicker>
+                </StackPanel>
+            </Grid>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" DockPanel.Dock="Top" Margin="0 0 5 0">
+                    <TextBlock Text="Etablissement d'origine"></TextBlock>
+                    <TextBox  Text="{Binding Path=InitInstitute,Mode=TwoWay}" Padding="2"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" DockPanel.Dock="Top" Margin="5 0 0 0">
+                    <TextBlock Text="Adresse"></TextBlock>
+                    <TextBox  Text="{Binding Path=Address,Mode=TwoWay}" Padding="2"></TextBox>
+                </StackPanel>
+            </Grid>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" DockPanel.Dock="Top" Margin="0 0 5 0">
+                    <TextBlock Text="Grade"></TextBlock>
+                    <ComboBox SelectedIndex="{Binding Grade}" >
+                        <ComboBoxItem>Docteur</ComboBoxItem>
+                        <ComboBoxItem>Technologue</ComboBoxItem>
+                        <ComboBoxItem>Maître Technologue</ComboBoxItem>
+                        <ComboBoxItem>Ingénieur</ComboBoxItem>
+                        <ComboBoxItem>PES</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" DockPanel.Dock="Top" Margin="5 0 0 0">
+                    <TextBlock Text="Spécialité"></TextBlock>
+                    <TextBox Text="{Binding Speciality}" />
+                </StackPanel>
+            </Grid>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" DockPanel.Dock="Top" Margin="0 0 5 0">
+                    <TextBlock Text="Statut"></TextBlock>
+                    <ComboBox SelectedIndex="{Binding Status}">
+                        <ComboBoxItem>Permanent</ComboBoxItem>
+                        <ComboBoxItem>Vacataire</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" DockPanel.Dock="Top" Margin="5 0 0 0">
+                    <TextBlock Text="Type du contrat"></TextBlock>
+                    <ComboBox SelectedIndex="{Binding ContractType}" IsEnabled="{Binding ContractTypeEnabled}" >
+                        <ComboBoxItem>CDI</ComboBoxItem>
+                        <ComboBoxItem>CDD</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+
+
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                
+                <Grid Grid.Column="1" Margin="0 10 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="saveBtn" Command="{Binding AddTeacherCommand}" Content="Enregistrer" Margin="5 0 10 0"/>
+                    <Button x:Name="cancelBtn" Click="cancelBtn_Click" Grid.Column="1" Content="Annuler"></Button>
+                </Grid>
+            </Grid>
+            <StackPanel DockPanel.Dock="Top"></StackPanel>
+            
+        </DockPanel>
+    </Border>
+</Window>

@@ -1,0 +1,58 @@
+﻿<Window x:Class="IPSAS.WPFDesktopUI.Views.Authentication"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IPSAS.WPFDesktopUI.Views"
+        mc:Ignorable="d"
+       Title="IPSAS | Authentification" Height="350" Width="600">
+    <Border Padding="10">
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+
+            <Image Height="70" Source="/Resources/ipsas_logo.png" />
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Text="Authentification" 
+                           FontWeight="Bold" 
+                           FontSize="20" 
+                           TextAlignment="Center"
+                           Foreground="#094d87"></TextBlock>
+                <Grid Margin="50 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="2*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Utilisateur" Margin="0 0"></TextBlock>
+                    <TextBox x:Name="userTxt" Grid.Column="1" Padding="2"></TextBox>
+                </Grid>
+                <Grid Margin="50 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="2*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Mot de passe" Margin="0 0"></TextBlock>
+                    <PasswordBox x:Name="passwordTxt" Grid.Column="1" Padding="2"></PasswordBox>
+                </Grid>
+                <Grid Margin="50 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="2*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="" Margin="0 0"></TextBlock>
+
+                    <Button x:Name="loginBtn" Grid.Column="1" Content="Se Connecter" Click="loginBtn_Click"></Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+    </Border>
+</Window>

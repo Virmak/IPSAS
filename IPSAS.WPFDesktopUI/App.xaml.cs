@@ -1,11 +1,4 @@
-﻿using IPSAS.Persistence;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
 namespace IPSAS.WPFDesktopUI
@@ -15,12 +8,18 @@ namespace IPSAS.WPFDesktopUI
     /// </summary>
     public partial class App : Application
     {
+        public static ServiceProvider ServiceProvider;
         public App()
         {
-            using (IPSASDbContext dbContext = new IPSASDbContext())
-            {
-                dbContext.Database.Migrate();
-            }
+
+        }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            var services = new ServiceCollection();
+
+            ServiceProvider = services.BuildServiceProvider();
         }
     }
 }
