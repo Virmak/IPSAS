@@ -16,7 +16,7 @@ namespace IPSAS.WPFDesktopUI.Views
         public EditTeacher(int teacherId)
         {
             InitializeComponent();
-            _addTeacherViewModel = new AddTeacherViewModel(new IPSASDbContext(), null, null); // add apropriate window objects 
+            _addTeacherViewModel = new AddTeacherViewModel(new IPSASDbContext()); // add apropriate window objects 
             _addTeacherViewModel.LoadTeacher(teacherId);
             DataContext = _addTeacherViewModel;
         }

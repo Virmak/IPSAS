@@ -3,7 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IPSAS.Persistence
 {
-    public class IPSASDbContext: DbContext
+
+    public interface IIPSASDbContext
+    {
+        public DbSet<Teacher> Teachers { get; set; }
+        public DbSet<MonthlyPayroll> MonthlyPayrolls { get; set; }
+        public DbSet<PayrollRecord> PayrollRecords { get; set; }
+    }
+
+    public class IPSASDbContext: DbContext, IIPSASDbContext
     {
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<MonthlyPayroll> MonthlyPayrolls { get; set; }

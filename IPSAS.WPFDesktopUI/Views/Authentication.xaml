@@ -14,6 +14,11 @@
                 <ColumnDefinition Width="2*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="20"></RowDefinition>
+            </Grid.RowDefinitions>
+
 
             <Image Height="70" Source="/Resources/ipsas_logo.png" />
 
@@ -52,6 +57,7 @@
                     <Button x:Name="loginBtn" Grid.Column="1" Content="Se Connecter" Click="loginBtn_Click"></Button>
                 </Grid>
             </StackPanel>
+            <ProgressBar x:Name="authProgress" Grid.Row="1" Grid.ColumnSpan="2" Minimum="1" Maximum="100" Height="20"></ProgressBar>
         </Grid>
 
     </Border>

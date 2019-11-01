@@ -12,13 +12,11 @@ namespace IPSAS.WPFDesktopUI.Views
     public partial class AddTeacher : Window
     {
         private AddTeacherViewModel _addTeacherViewModel;
-        private readonly TeachersList _teachersListWindow;
 
-        public AddTeacher(IPSASDbContext context, TeachersList teachersListWindow, Pointage pointage)
+        public AddTeacher(IPSASDbContext context)
         {
             InitializeComponent();
-            _teachersListWindow = teachersListWindow;
-            _addTeacherViewModel = new AddTeacherViewModel(context, teachersListWindow, pointage);
+            _addTeacherViewModel = new AddTeacherViewModel(context);
             DataContext = _addTeacherViewModel;
         }
 

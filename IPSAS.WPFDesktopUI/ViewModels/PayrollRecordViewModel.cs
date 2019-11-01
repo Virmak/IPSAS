@@ -1,4 +1,8 @@
 ﻿using IPSAS.Domain.Entities;
+using IPSAS.Persistence;
+using IPSAS.WPFDesktopUI.Messages;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.ComponentModel;
 
 namespace IPSAS.WPFDesktopUI.ViewModels
@@ -12,6 +16,8 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         public Teacher Teacher { get; set; }
         public MonthlyPayroll Payroll { get; set; }
         public double Rate { get; set; }
+
+        public PayrollRecord Record { get; set; }
         public int HoursCount { 
             get
             {
@@ -22,8 +28,12 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (value != _hoursCount)
                 {
                     _hoursCount = value;
-                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(GrossPay)));
-                    PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Net)));
+                    if (PropertyChanged != null)
+                    {
+                        PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(GrossPay)));
+                        PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Net)));
+                    }
+                    App.ServiceProvider.GetService<PayrollViewModel>().UpdatePayrollRecord(this);
                 }
             }
         }
@@ -34,9 +44,6 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             get
             {
                 return HoursCount * Rate;
-            }
-            set
-            {
             }
         }
         public double Net
@@ -49,16 +56,25 @@ namespace IPSAS.WPFDesktopUI.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public static PayrollRecordViewModel FromPayrollRecord(PayrollRecord t)
+        public void SaveRecord()
+        {
+            var context = new IPSASDbContext();
+            context.Attach(Record);
+            context.Entry(Record).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            context.SaveChanges();
+        }
+
+        public static PayrollRecordViewModel FromPayrollRecord(PayrollRecord record)
         {
             return new PayrollRecordViewModel
             {
-                Id = t.Id,
-                Teacher = t.Teacher,
-                Payroll = t.Payroll,
-                Rate = t.Rate,
-                HoursCount = t.HoursCount,
-                Retenu = t.Retenu
+                Id = record.Id,
+                Teacher = record.Teacher,
+                Payroll = record.Payroll,
+                Rate = record.Rate,
+                HoursCount = record.HoursCount,
+                Retenu = record.Retenu, 
+                Record = record
             };
         }
     }

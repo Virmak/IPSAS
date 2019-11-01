@@ -11,7 +11,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
-        private readonly IPSASDbContext dbContext;
+        private readonly IIPSASDbContext dbContext;
 
         private IList<TeacherViewModel> _teachers;
 
@@ -67,7 +67,10 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             }
             set
             {
-                SelectedTeacher = GetTeacherById(value.Id);
+                if (value != null)
+                {
+                    SelectedTeacher = GetTeacherById(value.Id);
+                }
             }
         }
 
@@ -84,8 +87,9 @@ namespace IPSAS.WPFDesktopUI.ViewModels
 
         public void LoadTeachers()
         {
-            Teachers = dbContext.Teachers
+            _teachers = dbContext.Teachers
                 .Select(t => TeacherViewModel.FromTeacher(t)).ToList();
+            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Teachers)));
         }
     }
 }

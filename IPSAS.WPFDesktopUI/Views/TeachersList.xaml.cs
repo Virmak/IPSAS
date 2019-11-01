@@ -12,24 +12,26 @@ namespace IPSAS.WPFDesktopUI.Views
     {
         private AddTeacher _addTeacherWindow;
         private EditTeacher _editTeacherWindow;
-        private TeachersListViewModel _dataContext;
-        private Pointage _pointangeWindow = new Pointage();
+        private TeachersListViewModel _teachersListVM;
+        private Payroll _payrollWindow;
         private IPSASDbContext _ipsasDbContext;
 
-        public TeachersList()
+        public TeachersList(IPSASDbContext dbContext, Payroll payrollWindow, TeachersListViewModel teachersListView)
         {
             InitializeComponent();
-            _ipsasDbContext = new IPSASDbContext();
-            _dataContext = new TeachersListViewModel(_ipsasDbContext);
-            DataContext = _dataContext;
+            _ipsasDbContext = dbContext;
+            _teachersListVM = teachersListView;
+            _payrollWindow = payrollWindow;
 
+
+            DataContext = _teachersListVM;
         }
 
         private void addTeacherBtn_Click(object sender, RoutedEventArgs e)
         {
             if (_addTeacherWindow == null)
             {
-                _addTeacherWindow = new AddTeacher(_ipsasDbContext, this, _pointangeWindow);
+                _addTeacherWindow = new AddTeacher(_ipsasDbContext);
             }
             _addTeacherWindow.Show();
             _addTeacherWindow.Focus();
@@ -53,24 +55,20 @@ namespace IPSAS.WPFDesktopUI.Views
 
         private void FichePointageClick(object sender, RoutedEventArgs e)
         {
+            //Messenger.Default.Send(new TeacherAddedMessage()); // Send new teacher to Payroll and TeacherList ViewModels
 
-            if (_pointangeWindow == null)
-            {
-                _pointangeWindow = new Pointage();
-            }
-            _pointangeWindow.RefreshContext();
-            _pointangeWindow.Show();
-            _pointangeWindow.Focus();
+            _payrollWindow.Show();
+            _payrollWindow.Focus();
         }
 
         private void editTeacherBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (_dataContext.SelectedTeacher == null)
+            if (_teachersListVM.SelectedTeacher == null)
             {
                 MessageBox.Show("Veuillez sélectionner un enseignant");
                 return;
             }
-            _editTeacherWindow = new EditTeacher(_dataContext.SelectedTeacher.Id);
+            _editTeacherWindow = new EditTeacher(_teachersListVM.SelectedTeacher.Id);
             
             _editTeacherWindow.Show();
             _editTeacherWindow.Focus();
@@ -78,7 +76,7 @@ namespace IPSAS.WPFDesktopUI.Views
 
         public void RefreshContext(object t = null)
         {
-            _dataContext.LoadTeachers();
+            _teachersListVM.LoadTeachers();
         }
     }
 }

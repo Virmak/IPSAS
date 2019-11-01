@@ -1,12 +1,12 @@
 ﻿using IPSAS.Domain.Entities;
 using IPSAS.Persistence;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace IPSAS.WPFDesktopUI.ViewModels
 {
@@ -15,14 +15,9 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
         private readonly IPSASDbContext dbContext;
-        private readonly IContextChanged teacherListWindow;
-        private readonly IContextChanged payrollWindow;
-
-        public AddTeacherViewModel(IPSASDbContext dbContext, IContextChanged teacherListWindow, IContextChanged payrollWindow)
+        public AddTeacherViewModel(IPSASDbContext dbContext)
         {
             this.dbContext = dbContext;
-            this.teacherListWindow = teacherListWindow;
-            this.payrollWindow = payrollWindow;
         }
 
         public void LoadTeacher(int teacherId)
@@ -74,38 +69,56 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                         return false;
                     }
 
-
-                    var teacher = new Teacher {
-                        CIN = _CIN,
-                        FirstName = _firstName, LastName = _lastName, 
-                        Address = _address, Grade = (TeacherGrade)_grade,
-                        Phone = int.Parse(_phone), HomeInstitution = _initInstitute,
-                        Speciality = _speciality,
-                        Status = (TeacherStatus)_status,
-                    };
-
-                    if (teacher.Status == TeacherStatus.Permanent)
-                    {
-                        teacher.ContractType = (ContractType)_contractType;
-                    }
-
                     try
                     {
-                        dbContext.Teachers.Add(teacher);
-                        dbContext.SaveChanges();
-                        teacherListWindow.RefreshContext();
-                        payrollWindow.RefreshContext(teacher.CIN);
-                        MessageBox.Show("Enseignant ajouté");
-                    } catch(Exception e)
+                        var teacher = new Teacher
+                        {
+                            CIN = _CIN,
+                            FirstName = _firstName,
+                            LastName = _lastName,
+                            Address = _address,
+                            Grade = (TeacherGrade)_grade,
+                            Phone = int.Parse(_phone),
+                            HomeInstitution = _initInstitute,
+                            Speciality = _speciality,
+                            Status = (TeacherStatus)_status,
+                        };
+                        if (teacher.Status == TeacherStatus.Permanent)
+                        {
+                            teacher.ContractType = (ContractType)_contractType;
+                        }
+
+                        try
+                        {
+                            dbContext.Teachers.Add(teacher);
+                            dbContext.SaveChanges();
+                            try
+                            {
+
+                                App.ServiceProvider.GetService<TeachersListViewModel>().LoadTeachers();
+                                App.PayrollViewModel.AddTeacherPayrollRecord(teacher);
+                            }
+                            catch(Exception e)
+                            {
+                                MessageBox.Show("error");
+                            }
+                            MessageBox.Show("Enseignant ajouté");
+                        }
+                        catch (DbUpdateException e)
+                        {
+                            dbContext.Teachers.Remove(teacher);
+                            MessageBox.Show("Le numéro de la CIN est déja enregistré", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    } 
+                    catch(FormatException e)
                     {
-                        MessageBox.Show("Le numéro de la CIN est déja enregistré", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Veillez entrez un numéro de téléphone valide");
                     }
+
+                    
                     return null;
                 }, 
-                () => { 
-                    
-
-
+                () => {
                     return true; 
                 }));
             }

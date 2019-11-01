@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Threading.Tasks;
+using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IPSAS.WPFDesktopUI.Views
 {
@@ -13,16 +15,13 @@ namespace IPSAS.WPFDesktopUI.Views
             InitializeComponent();
         }
 
-        private void loginBtn_Click(object sender, RoutedEventArgs e)
+        private async void loginBtn_Click(object sender, RoutedEventArgs e)
         {
             if (userTxt.Text == "1" && passwordTxt.Password == "")
             {
-                if (_teachersListWindow == null)
-                {
-                    _teachersListWindow = new TeachersList();
-                }
-                _teachersListWindow.Show();
-                this.Hide();
+                authProgress.IsIndeterminate = true;
+                var teachersListWindow = App.ServiceProvider.GetService<TeachersList>();
+                teachersListWindow.Show();
             }
             else
             {

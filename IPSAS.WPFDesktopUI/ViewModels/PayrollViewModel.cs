@@ -1,16 +1,17 @@
 ﻿using IPSAS.Domain.Entities;
 using IPSAS.Persistence;
+using IPSAS.WPFDesktopUI.Messages;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows;
 
 namespace IPSAS.WPFDesktopUI.ViewModels
 {
-    public class PayrollViewModel
+    public class PayrollViewModel : INotifyPropertyChanged
     {
         private IPSASDbContext context;
         private IList<PayrollRecordViewModel> _payrollRecords;
@@ -20,12 +21,12 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         private int _selectedMonth;
         private string _selectedAcademicYear;
 
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public PayrollViewModel(IPSASDbContext context)
         {
             this.context = context;
             Init();
-        
         }
 
         public void Init()
@@ -42,10 +43,28 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             {
                 academicYear = currentYear + "/" + (currentYear + 1);
             }
+            CreatePayroll(currentMonth, academicYear);
 
+            _academicYears = new ObservableCollection<string>();
+            for (var i = 2019; i < currentYear + 4; i++)
+            {
+                _academicYears.Add(i + "/" + (i + 1));
+            }
 
+            _selectedAcademicYear = academicYear;
+
+            _months = new ObservableCollection<string>(new string[] {
+                "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+                "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" });
+            _selectedMonth = currentMonth;
+
+            context.SaveChanges();
+        }
+
+        public void CreatePayroll(int month, string year)
+        {
             var payroll = context.MonthlyPayrolls
-                .Where(p => p.Month == currentMonth && p.AcademicYear == academicYear)
+                .Where(p => p.Month == month && p.AcademicYear == year)
                 .Include(p => p.Records)
                 .ThenInclude(r => (r as PayrollRecord).Teacher)
                 .FirstOrDefault();
@@ -54,60 +73,93 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             {
                 payroll = new MonthlyPayroll
                 {
-                    Month = currentMonth,
-                    AcademicYear = academicYear
+                    Month = month,
+                    AcademicYear = year
                 };
 
                 payroll.Records = new List<PayrollRecord>();
-                foreach (var teacher in context.Teachers)
-                {
-                    var record = new PayrollRecord { Teacher = teacher, HoursCount = 0, Rate = teacher.Rate, Payroll = _payroll, Retenu = 0.15 };
-                    payroll.Records.Add(record);
-                    context.PayrollRecords.Add(record);
-                }
                 context.MonthlyPayrolls.Add(payroll);
             }
 
+            foreach (var teacher in context.Teachers.Where(t => t.Status == TeacherStatus.Vacataire).ToList())
+            {
+                var record = context.PayrollRecords.FirstOrDefault(pr => pr.TeacherId == teacher.Id && pr.PayrollId == payroll.Id);
+                if (record == null)
+                {
+                    record = new PayrollRecord { Teacher = teacher, HoursCount = 0, Rate = teacher.Rate, Payroll = _payroll, Retenu = 0.15 };
+                    context.PayrollRecords.Add(record);
+                }
+                payroll.Records.Add(record);
+            }
+
             _payroll = payroll;
-            
+        }
 
-            _academicYears = new ObservableCollection<string>();
-            for (var i = 2019; i < currentYear + 4; i++)
+        public void AddTeacherPayrollRecord(Teacher teacher)
+        {
+            var x = _payroll.Records.FirstOrDefault(r => r.TeacherId == teacher.Id);
+
+            var record = new PayrollRecord { Teacher = teacher, HoursCount = 0, Rate = teacher.Rate, Payroll = _payroll, Retenu = 0.15 };
+            _payroll.Records.Add(record);
+            if (_payroll.Records.FirstOrDefault(r => r.TeacherId == teacher.Id) == null)
             {
-                _academicYears.Add(i + "/" + (i + 1));
+                context.PayrollRecords.Add(record);
+                context.SaveChanges();
             }
+            _payrollRecords.Add(PayrollRecordViewModel.FromPayrollRecord(record));
 
-            _selectedAcademicYear = "2019/2020";
-            if (currentMonth >= 9)
+
+            if (PropertyChanged != null)
             {
-                _selectedAcademicYear = currentYear + "/" + (currentYear + 1);
-            } 
-            else
-            {
-                _selectedAcademicYear = (currentYear - 1) + "/" + currentYear;
+
+                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(PayrollRecords)));
             }
-            _months = new ObservableCollection<string>(new string[] { "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" });
-            _selectedMonth = currentMonth;
-
-            context.SaveChanges();
-
 
         }
 
-        internal void AddTeacherRecord(string cin)
+        public List<PayrollRecord> CreateMissingPayrollRecords(MonthlyPayroll payroll)
         {
-            var teacher = context.Teachers.FirstOrDefault(t => t.CIN == cin);
-            var record = new PayrollRecord { Teacher = teacher, HoursCount = 0, Rate = teacher.Rate, Payroll = _payroll, Retenu = 0.15 };
-            _payroll.Records.Add(record);
-            context.PayrollRecords.Add(record);
-            context.SaveChanges();
+            var records = new List<PayrollRecord>();
+            foreach (var teacher in context.Teachers.Where(t => t.Status == TeacherStatus.Vacataire).ToList())
+            {
+                var record = new PayrollRecord { Teacher = teacher, HoursCount = 0, Rate = teacher.Rate, Payroll = _payroll, Retenu = 0.15 };
+                if (!payroll.Records.Select(prVM => prVM.Teacher.Id).Contains(teacher.Id))
+                {
+                    records.Add(record);
+                    context.PayrollRecords.Add(record);
+                }
+            }
+            return records;
+        }
+
+        public void UpdatePayrollRecord(PayrollRecordViewModel payrollRecordVM)
+        {
+            if (_payrollRecords == null) return;
+            var pr = _payrollRecords.FirstOrDefault(pr => pr.Id == payrollRecordVM.Id);
+            if (pr != null)
+            {
+                pr.HoursCount = payrollRecordVM.HoursCount;
+                pr.Record.HoursCount = payrollRecordVM.HoursCount;
+            } 
+            else
+            {
+                _payroll.Records.Add(payrollRecordVM.Record);
+                _payrollRecords.Add(payrollRecordVM);
+            }
         }
 
         public void SaveChanges()
         {
-            var r = _payroll.Records;
+            foreach (var recordVM in _payrollRecords.Distinct())
+            {
+                context.Attach(recordVM.Record);
+                context.Entry(recordVM.Record).State = EntityState.Modified;
+            }
 
-            MessageBox.Show("save edit");
+            context.SaveChanges();
+
+
+            MessageBox.Show("Fiche de pointage enregistré");
         }
 
 
@@ -127,7 +179,8 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         }
 
 
-        public ObservableCollection<string> AcademicYears { 
+        public ObservableCollection<string> AcademicYears
+        {
             get
             {
                 return _academicYears;
@@ -142,34 +195,38 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         {
             get
             {
-                return _payroll.Records.Select(r => PayrollRecordViewModel.FromPayrollRecord(r)).ToList();
+                if (_payrollRecords == null)
+                {
+                    _payrollRecords = _payroll.Records.Select(r => PayrollRecordViewModel.FromPayrollRecord(r)).ToList();
+                }
+                return _payrollRecords;
             }
             set
             {
-                throw new Exception("Cannot set payrollrecords");
-                /*
                 if (_payrollRecords != value)
                 {
-                    _payroll.Records = value;
-                }*/
+                    _payrollRecords = value;
+                }
+
             }
         }
 
-        public MonthlyPayroll SelectedPayroll {
+        public MonthlyPayroll SelectedPayroll
+        {
             get
             {
                 return _payroll;
             }
-            set 
-            { 
+            set
+            {
                 if (value != _payroll)
                 {
                     _payroll = value;
                 }
-            } 
+            }
         }
 
-        public int SelectedMonth 
+        public int SelectedMonth
         {
             get
             {
@@ -184,7 +241,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 }
             }
         }
-        public string SelectedAcademicYear 
+        public string SelectedAcademicYear
         {
             get
             {
