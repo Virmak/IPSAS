@@ -16,6 +16,10 @@ namespace IPSAS.Domain.Entities
         public double GrossPay { 
             get
             {
+                if (Teacher.Status == TeacherStatus.Permanent)
+                {
+                    return Teacher.GrossPay;
+                }
                 return HoursCount * Rate;
             }
         }
@@ -23,6 +27,10 @@ namespace IPSAS.Domain.Entities
         public double Net { 
             get
             {
+                if (Teacher.Status == TeacherStatus.Permanent)
+                {
+                    return Teacher.GrossPay * (1 - Retenu);
+                }
                 return HoursCount * Rate * (1 - Retenu);
             }
         }

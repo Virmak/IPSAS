@@ -8,5 +8,6 @@ namespace IPSAS.Domain.Entities
         public int Month { get; set; }
         public string AcademicYear { get; set; }
         public ICollection<PayrollRecord> Records { get; set; }
+        public ICollection<Payslip> Payslips { get; set; }
     }
 }

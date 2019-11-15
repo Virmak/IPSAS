@@ -12,22 +12,24 @@ namespace IPSAS.WPFDesktopUI.Views
     {
         private AddTeacher _addTeacherWindow;
         private EditTeacher _editTeacherWindow;
-        private TeachersListViewModel _teachersListVM;
-        private Payroll _payrollWindow;
-        private IPSASDbContext _ipsasDbContext;
+        private readonly Payroll _payrollWindow;
+        private readonly Payslip _payslipWindow;
+        private readonly TeachersListViewModel _teachersListVM;
+        private readonly IPSASDbContext _ipsasDbContext;
 
-        public TeachersList(IPSASDbContext dbContext, Payroll payrollWindow, TeachersListViewModel teachersListView)
+        public TeachersList(IPSASDbContext dbContext, Payroll payrollWindow, Payslip payslipWindow, TeachersListViewModel teachersListView)
         {
             InitializeComponent();
             _ipsasDbContext = dbContext;
             _teachersListVM = teachersListView;
+            _payslipWindow = payslipWindow;
             _payrollWindow = payrollWindow;
 
 
             DataContext = _teachersListVM;
         }
 
-        private void addTeacherBtn_Click(object sender, RoutedEventArgs e)
+        private void AddTeacherBtn_Click(object sender, RoutedEventArgs e)
         {
             if (_addTeacherWindow == null)
             {
@@ -77,6 +79,12 @@ namespace IPSAS.WPFDesktopUI.Views
         public void RefreshContext(object t = null)
         {
             _teachersListVM.LoadTeachers();
+        }
+
+        private void GestionPaieButton_Click(object sender, RoutedEventArgs e)
+        {
+            _payslipWindow.Show();
+            _payslipWindow.Focus();
         }
     }
 }

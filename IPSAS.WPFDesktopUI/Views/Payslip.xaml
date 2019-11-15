@@ -1,0 +1,209 @@
+﻿<Window x:Class="IPSAS.WPFDesktopUI.Views.Payslip"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IPSAS.WPFDesktopUI.Views"
+        mc:Ignorable="d"
+        Closing="Window_Closing"
+        Title="Gestion de la paie" Height="650" Width="800">
+
+    <Border Padding="10">
+        <!-- Search Panel-->
+        <DockPanel VerticalAlignment="Stretch">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top" >
+                    <Grid.ColumnDefinitions></Grid.ColumnDefinitions>
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="2*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="1.8*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <!--<GroupBox Header="Enseignant" DataContext="{Binding SelectedTeacher}">
+                        <StackPanel>
+                            <StackPanel Margin="4">
+                                <TextBlock Text="Matricule" />
+                                <TextBox  Text="{Binding Id}" IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel Margin="4">
+                                <TextBlock Text="Nom &amp; prénom" />
+                                <TextBox Text="{Binding FullName}"  IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel Margin="4">
+                                <TextBlock Text="Grade" />
+                                <TextBox Text="{Binding Grade}"  IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel Margin="4">
+                                <TextBlock Text="Statut" />
+                                <TextBox  Text="{Binding Status}" IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel Margin="4">
+                                <TextBlock  Text="Type de contrat" />
+                                <TextBox Text="{Binding ContractType}" IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </GroupBox> -->
+                    <GroupBox Header="Fiche de la paie"  Grid.Row="0" Grid.RowSpan="2">
+                        <DockPanel LastChildFill="False">
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Année" />
+                                <ComboBox ItemsSource="{Binding Years}" SelectedIndex="{Binding SelectedYear}" />
+
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Mois" />
+                                <ComboBox ItemsSource="{Binding Months}" SelectedIndex="{Binding SelectedMonth}" />
+
+                            </StackPanel>
+                           
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Nombre d'heures" />
+                                <TextBox Text="{Binding HoursCount}" IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Taux horaire brut" />
+                                <TextBox Text="{Binding HourlyRate}" IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Salaire brut" />
+                                <TextBox Text="{Binding GrossPay}" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Retenu" />
+                                <TextBox Text="15%" IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Salaire net" />
+                                <TextBox Text="{Binding NetSalary}" IsEnabled="False" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Type de paiement" />
+                                <ComboBox SelectedIndex="{Binding PaymentType}" ItemsSource="{Binding PaymentTypes}" />
+                            </StackPanel>
+
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4">
+                                <TextBlock Text="Date de paiement" />
+                                <DatePicker SelectedDate="{Binding PaymentDate}" />
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4" Visibility="{Binding PaymentDetailsVisibility }">
+                                <TextBlock Text="Banque" />
+                                <TextBox Text="{Binding Bank}" Padding="2"></TextBox>
+                            </StackPanel>
+
+                            <StackPanel DockPanel.Dock="Top" Margin="4" Visibility="{Binding PaymentDetailsVisibility }">
+                                <TextBlock Text="{Binding PaymentRefName}" />
+                                <TextBox Text="{Binding PaymentDetails}" Padding="2"></TextBox>
+                            </StackPanel>
+
+
+
+                            <Grid DockPanel.Dock="Bottom" Height="30">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Button Command="{Binding SavePayslipCommand}" Content="Enregistrer" Grid.Column="0" Margin="0 5 5 0"></Button>
+                                <Button Command="{Binding DeletePayslipCommand}" Content="Supprimer" Grid.Column="1" Margin="0 5 5 0"></Button>
+                                <Button Command="{Binding PrintPayslipCommand}" Content="Imprimer" Grid.Column="2"  Margin="0 5 0 0" ></Button>
+                            </Grid>
+
+
+                        </DockPanel>
+                    </GroupBox>
+
+                    <GroupBox Header="Enseignant" Padding="5"  Grid.Column="1" Grid.RowSpan="2">
+                        <DockPanel LastChildFill="True">
+                            <Grid 
+                                DockPanel.Dock="Top">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Margin="4">
+                                    <TextBlock Text="Matricule" />
+                                    <TextBox Text="{Binding Matricule}" Padding="2"></TextBox>
+                                </StackPanel>
+
+                                <StackPanel Margin="5" Grid.Column="1">
+                                    <TextBlock Text="Nom" />
+                                    <TextBox Text="{Binding LastName}" Padding="2"></TextBox>
+                                </StackPanel>
+                                
+                                <StackPanel Margin="5 5 0 0" Grid.Column="2">
+                                    <TextBlock Text="Prénom" />
+                                    <TextBox Text="{Binding FirstName}" Padding="2"></TextBox>
+                                </StackPanel>
+
+                                <StackPanel Margin="4" Grid.Column="0" Grid.Row="1">
+                                    <TextBlock Text="Grade" />
+                                    <ComboBox  SelectedIndex="{Binding Grade}" ItemsSource="{Binding GradesList}"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="4" Grid.Column="1" Grid.Row="1">
+                                    <TextBlock Text="Statut" />
+                                    <ComboBox  SelectedIndex="{Binding Status}" ItemsSource="{Binding StatusList}"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="4" Grid.Column="2" Grid.Row="1">
+                                    <TextBlock  Text="Type de contrat" />
+                                    <ComboBox SelectedIndex="{Binding ContractType}" ItemsSource="{Binding ContractTypes}"/>
+                                </StackPanel>
+
+
+                                <Button Command="{Binding ResetSearchCommand}" Content="Annuler" Grid.Column="1" Grid.Row="2" Margin="5"></Button>
+
+                                <Button Command="{Binding SearchCommand}" Content="Chercher" Grid.Column="2" Grid.Row="2" Margin="5 5 0 5"></Button>
+                            </Grid>
+
+                            <DataGrid 
+                                Margin="5 5 0 0" 
+                                ItemsSource="{Binding Teachers}"  
+                                DockPanel.Dock="Top"
+                                AutoGenerateColumns="False" 
+                                SelectedItem="{Binding SelectedTeacher}" 
+                                CanUserAddRows="False"
+                                SelectionMode="Single">   
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Binding="{Binding Id}" Header="Matricule" IsReadOnly="True"  Width="*" />
+                                    <DataGridTextColumn Binding="{Binding FullName}" Header="Nom &amp; Prénom"  Width="2*" IsReadOnly="True" />
+                                    <DataGridTextColumn Binding="{Binding Status}" Header="Statut" Width="*" IsReadOnly="True" />
+
+                                    <DataGridTextColumn Binding="{Binding Grade}" Header="Grade"  Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </GroupBox> 
+                    
+                </Grid>
+            </DockPanel>
+        </DockPanel>
+        
+    </Border>
+</Window>

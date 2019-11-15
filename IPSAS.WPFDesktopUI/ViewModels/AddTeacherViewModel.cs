@@ -15,6 +15,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged = (sender, e) => { };
 
         private readonly IPSASDbContext dbContext;
+        
         public AddTeacherViewModel(IPSASDbContext dbContext)
         {
             this.dbContext = dbContext;
@@ -83,6 +84,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                             Speciality = _speciality,
                             Status = (TeacherStatus)_status,
                         };
+
                         if (teacher.Status == TeacherStatus.Permanent)
                         {
                             teacher.ContractType = (ContractType)_contractType;
@@ -94,9 +96,9 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                             dbContext.SaveChanges();
                             try
                             {
-
-                                App.ServiceProvider.GetService<TeachersListViewModel>().LoadTeachers();
-                                App.PayrollViewModel.AddTeacherPayrollRecord(teacher);
+                                App.ServiceProvider.GetService<TeachersListViewModel>().AddTeacher(teacher);
+                                App.ServiceProvider.GetService<PayslipViewModel>().AddTeacher(teacher);
+                                App.ServiceProvider.GetService<PayrollViewModel>().AddTeacherDisptach(teacher);
                             }
                             catch(Exception e)
                             {

@@ -9,6 +9,9 @@ namespace IPSAS.Persistence
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<MonthlyPayroll> MonthlyPayrolls { get; set; }
         public DbSet<PayrollRecord> PayrollRecords { get; set; }
+        public DbSet<Payslip> Payslips { get; set; }
+
+        public DbSet<Payment> Payments { get; set; }
     }
 
     public class IPSASDbContext: DbContext, IIPSASDbContext
@@ -16,7 +19,8 @@ namespace IPSAS.Persistence
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<MonthlyPayroll> MonthlyPayrolls { get; set; }
         public DbSet<PayrollRecord> PayrollRecords { get; set; }
-
+        public DbSet<Payslip> Payslips { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

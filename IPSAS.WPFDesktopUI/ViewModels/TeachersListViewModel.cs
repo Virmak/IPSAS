@@ -1,6 +1,8 @@
 ﻿using IPSAS.Domain.Entities;
 using IPSAS.Persistence;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
@@ -13,7 +15,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
 
         private readonly IIPSASDbContext dbContext;
 
-        private IList<TeacherViewModel> _teachers;
+        private ObservableCollection<TeacherViewModel> _teachers;
 
         private ICommand _clickCommand;
         public ICommand DeselectTeacherCommand
@@ -24,7 +26,9 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             }
         }
 
-        public IList<TeacherViewModel> Teachers
+        public ObservableCollection<string> GradesList { get; }
+
+        public ObservableCollection<TeacherViewModel> Teachers
         {
             get
             {
@@ -83,13 +87,22 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         {
             this.dbContext = dbContext;
             LoadTeachers();
+            GradesList = new ObservableCollection<string>(Enum.GetNames(typeof(TeacherGrade)));
         }
 
         public void LoadTeachers()
         {
-            _teachers = dbContext.Teachers
-                .Select(t => TeacherViewModel.FromTeacher(t)).ToList();
+            _teachers = new ObservableCollection<TeacherViewModel>(
+                dbContext.Teachers.Select(t => TeacherViewModel.FromTeacher(t)).ToList());
+
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Teachers)));
+        }
+
+        public void AddTeacher(Teacher teacher)
+        {
+            _teachers.Add(TeacherViewModel.FromTeacher(teacher));
+            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(nameof(Teachers)));
+
         }
     }
 }

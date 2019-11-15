@@ -22,10 +22,13 @@ namespace IPSAS.WPFDesktopUI
             base.OnStartup(e);
             var services = new ServiceCollection();
             services.AddDbContext<IPSASDbContext>();
-            services.AddSingleton<TeachersListViewModel>();
+
+            services.AddScoped<TeachersListViewModel>();
             services.AddScoped<PayrollViewModel>();
+            services.AddScoped<PayslipViewModel>();
             services.AddScoped<TeachersList>();
             services.AddScoped<Payroll>();
+            services.AddScoped<Payslip>();
 
             ServiceProvider = services.BuildServiceProvider();
 

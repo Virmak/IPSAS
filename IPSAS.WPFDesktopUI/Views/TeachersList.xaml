@@ -12,8 +12,6 @@
         <!-- Search Panel-->
         <DockPanel VerticalAlignment="Stretch">
             <TextBlock DockPanel.Dock="Top" Text="Recherche Enseignant" FontWeight="Bold" Margin="0 10"></TextBlock>
-
-
             <Grid DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"></ColumnDefinition>
@@ -55,18 +53,13 @@
                 <!-- Grade -->
                 <StackPanel Grid.Column="0" Margin="0 0 10 0">
                     <TextBlock Text="Grade"></TextBlock>
-                    <ComboBox SelectedIndex="{Binding Grade}">
-                        <ComboBoxItem>Docteur</ComboBoxItem>
-                        <ComboBoxItem>Technologue</ComboBoxItem>
-                        <ComboBoxItem>Maître Technologue</ComboBoxItem>
-                        <ComboBoxItem>Ingénieur</ComboBoxItem>
-                        <ComboBoxItem>PES</ComboBoxItem>
+                    <ComboBox SelectedItem="{Binding SelectedTeacher.Grade}" ItemsSource="{Binding GradesList }">
                     </ComboBox>
                 </StackPanel>
                 <!-- Spécialité -->
                 <StackPanel Grid.Column="1" Margin="0 0 10 0">
                     <TextBlock Text="Spécialité"></TextBlock>
-                    <TextBox Text="{Binding Speciality}"/>
+                    <TextBox Text="{Binding SelectedTeacher.Grade}" Padding="2"/>
                 </StackPanel>
                 <!-- Grade -->
                 <StackPanel Grid.Column="2">
@@ -97,8 +90,10 @@
                 </Grid.ColumnDefinitions>
 
 
+                <Button Grid.Column="1" Content="Gestion de la paie" Click="GestionPaieButton_Click" Margin="0 0 5 0"></Button>
 
-                <Button Grid.Column="2" Content="Fiche de Pointage" Click="FichePointageClick"></Button>
+                <Button Grid.Column="2" Content="Fiche de Pointage" Click="FichePointageClick" Margin="5 0 0 0"></Button>
+               
                 <!-- Actions -->
                 <StackPanel Grid.Column="3" >
                     <Grid>
@@ -108,20 +103,24 @@
                         </Grid.ColumnDefinitions>
 
                         <Button Grid.Column="0" x:Name="editTeacherBtn" Content="Modifier" Padding="2" Margin="10 0 5 0" Click="editTeacherBtn_Click"></Button>
-                        <Button Grid.Column="1" x:Name="addTeacherBtn" Content="Ajouter" Margin="5 0 0 0" Click="addTeacherBtn_Click"></Button>
+                        <Button Grid.Column="1" x:Name="addTeacherBtn" Content="Ajouter" Margin="5 0 0 0" Click="AddTeacherBtn_Click"></Button>
                     </Grid>
                 </StackPanel>
             </Grid>
 
-            <DataGrid x:Name="teachersDG" ItemsSource="{Binding Teachers}"  
-                AutoGenerateColumns="False" DockPanel.Dock="Top" Margin="0 10 0 0" 
-                SelectedItem="{Binding SelectedTeacherVM}" SelectedCellsChanged="teachersDG_SelectedCellsChanged">
+            <DataGrid x:Name="teachersDG" 
+                      ItemsSource="{Binding Teachers}"  
+                      AutoGenerateColumns="False" 
+                      DockPanel.Dock="Top" Margin="0 10 0 0" 
+                      SelectedItem="{Binding SelectedTeacherVM}" 
+                      CanUserAddRows="False"
+                      SelectionMode="Single">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Id}" Header="Matricule" Width="*" />
-                    <DataGridTextColumn Binding="{Binding CIN}" Header="CIN" Width="*" />
-                    <DataGridTextColumn Binding="{Binding FullName}" Header="Nom &amp; Prénom" Width="3*" />
+                    <DataGridTextColumn Binding="{Binding Id}" Header="Matricule" Width="*" IsReadOnly="True" />
+                    <DataGridTextColumn Binding="{Binding CIN}" Header="CIN" Width="*" IsReadOnly="True" />
+                    <DataGridTextColumn Binding="{Binding FullName}" Header="Nom &amp; Prénom" Width="3*" IsReadOnly="True" />
 
-                    <DataGridTextColumn Binding="{Binding Status}" Header="Statut" Width="*" />
+                    <DataGridTextColumn Binding="{Binding Status}" Header="Statut" Width="*" IsReadOnly="True" />
 
                 </DataGrid.Columns>
             </DataGrid>

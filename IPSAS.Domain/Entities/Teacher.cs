@@ -16,12 +16,17 @@ namespace IPSAS.Domain.Entities
         public TeacherGrade Grade { get; set; }
         public TeacherStatus Status { get; set; }
         public ContractType ContractType { get; set; }
+        public ICollection<Payslip> Payslips { get; set; }
         public ICollection<PayrollRecord> PayrollRecords { get; set; }
         [NotMapped]
         public double Rate
         {
             get
             {
+                if (Status == TeacherStatus.Permanent)
+                {
+                    return 0;
+                }
                 switch (Grade)
                 {
                     case TeacherGrade.Docteur:
@@ -36,7 +41,21 @@ namespace IPSAS.Domain.Entities
                 return 0;
             }
         }
-        public string FullName { get { return FirstName + " " + LastName; } }
+        [NotMapped]
+        public string FullName { get { return FirstName + " " + LastName; } set { } }
+        [NotMapped]
+        public double GrossPay
+        {
+            get
+            {
+                if (Status == TeacherStatus.Permanent)
+                {
+                    return 1200;
+                }
+                return 0;
+            }
+            set { }
+        }
     }
 
     public enum TeacherGrade

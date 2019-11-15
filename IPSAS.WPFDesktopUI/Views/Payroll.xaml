@@ -62,7 +62,6 @@
                           AutoGenerateColumns="False" 
                           DockPanel.Dock="Top"
                           Margin="0 10 0 0"
-                          CellEditEnding="teachersDG_CellEditEnding"
                           CanUserAddRows="False">
                     <DataGrid.Columns>
                         <DataGridTextColumn Binding="{Binding Teacher.Id}" Header="Matricule" Width="*" IsReadOnly="True">
