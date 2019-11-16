@@ -1,4 +1,6 @@
-﻿using IPSAS.Persistence;
+﻿using IPSAS.Application.UseCases;
+using IPSAS.Domain.Entities;
+using IPSAS.Persistence;
 using IPSAS.WPFDesktopUI.ViewModels;
 using IPSAS.WPFDesktopUI.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +11,7 @@ namespace IPSAS.WPFDesktopUI
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         public static ServiceProvider ServiceProvider;
         public static PayrollViewModel PayrollViewModel;
@@ -26,9 +28,11 @@ namespace IPSAS.WPFDesktopUI
             services.AddScoped<TeachersListViewModel>();
             services.AddScoped<PayrollViewModel>();
             services.AddScoped<PayslipViewModel>();
+            services.AddScoped<SettingsViewModel>();
             services.AddScoped<TeachersList>();
             services.AddScoped<Payroll>();
-            services.AddScoped<Payslip>();
+            services.AddScoped<Views.Payslip>();
+            services.AddScoped<SettingsWindow>();
 
             ServiceProvider = services.BuildServiceProvider();
 

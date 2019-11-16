@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IPSAS.Persistence.Migrations
 {
     [DbContext(typeof(IPSASDbContext))]
-    [Migration("20191107101615_AddedPayslip")]
-    partial class AddedPayslip
+    [Migration("20191116194310_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -37,6 +37,33 @@ namespace IPSAS.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MonthlyPayrolls");
+                });
+
+            modelBuilder.Entity("IPSAS.Domain.Entities.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Bank")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("IPSAS.Domain.Entities.PayrollRecord", b =>
@@ -78,25 +105,10 @@ namespace IPSAS.Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("AcademicYear")
+                    b.Property<int?>("MonthlyPayrollId")
                         .HasColumnType("int");
 
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<int>("Month")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PayementDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PayementDetails")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PayementType")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("PayrollId")
+                    b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
                     b.Property<int?>("TeacherId")
@@ -104,11 +116,34 @@ namespace IPSAS.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PayrollId");
+                    b.HasIndex("MonthlyPayrollId");
+
+                    b.HasIndex("PaymentId");
 
                     b.HasIndex("TeacherId");
 
                     b.ToTable("Payslips");
+                });
+
+            modelBuilder.Entity("IPSAS.Domain.Entities.Remuneration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Grade")
+                        .HasColumnType("int");
+
+                    b.Property<double>("HourlyRate")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Salary")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Remunerations");
                 });
 
             modelBuilder.Entity("IPSAS.Domain.Entities.Teacher", b =>
@@ -174,9 +209,13 @@ namespace IPSAS.Persistence.Migrations
 
             modelBuilder.Entity("IPSAS.Domain.Entities.Payslip", b =>
                 {
-                    b.HasOne("IPSAS.Domain.Entities.MonthlyPayroll", "Payroll")
+                    b.HasOne("IPSAS.Domain.Entities.MonthlyPayroll", "MonthlyPayroll")
+                        .WithMany("Payslips")
+                        .HasForeignKey("MonthlyPayrollId");
+
+                    b.HasOne("IPSAS.Domain.Entities.Payment", "Payment")
                         .WithMany()
-                        .HasForeignKey("PayrollId");
+                        .HasForeignKey("PaymentId");
 
                     b.HasOne("IPSAS.Domain.Entities.Teacher", "Teacher")
                         .WithMany("Payslips")

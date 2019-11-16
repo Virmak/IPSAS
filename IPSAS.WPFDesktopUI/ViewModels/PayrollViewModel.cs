@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using Z.EntityFramework.Plus;
 
 namespace IPSAS.WPFDesktopUI.ViewModels
 {
@@ -65,23 +66,42 @@ namespace IPSAS.WPFDesktopUI.ViewModels
 
         public void CreatePayroll(int month, string year)
         {
-            var payroll = context.MonthlyPayrolls
-                .Where(p => p.Month == month && p.AcademicYear == year)
-                .Include(p => p.Records)
-                .ThenInclude(r => (r as PayrollRecord).Teacher)
-                .FirstOrDefault();
 
-            if (payroll == null)
+            MonthlyPayroll payroll;
+
+            var payrollRecords = context.PayrollRecords
+                .Where(p => p.Payroll.Month == month && p.Payroll.AcademicYear == year && p.Teacher.Status == TeacherStatus.Vacataire)
+                .Include(p => p.Payroll)
+                .ToList();
+
+            if (payrollRecords != null && payrollRecords.Count > 0)
             {
-                payroll = new MonthlyPayroll
-                {
-                    Month = month,
-                    AcademicYear = year
-                };
-
-                payroll.Records = new List<PayrollRecord>();
-                context.MonthlyPayrolls.Add(payroll);
+                payroll = payrollRecords[0].Payroll;
             }
+            else
+            {
+                payroll = context.MonthlyPayrolls
+                    .Where(p => p.Month == month && p.AcademicYear == year)
+                    .FirstOrDefault();
+                if (payroll == null)
+                {
+                    payroll = new MonthlyPayroll
+                    {
+                        Month = month,
+                        AcademicYear = year
+                    };
+
+                    payroll.Records = new List<PayrollRecord>();
+                    context.MonthlyPayrolls.Add(payroll);
+                }
+            }
+
+            //var payroll = context.MonthlyPayrolls
+            //    .Where(p => p.Month == month && p.AcademicYear == year)
+            //    .Include(p => p.Records)
+            //    .ThenInclude(r => (r as PayrollRecord).Teacher)
+            //    .FirstOrDefault();
+
 
             foreach (var teacher in context.Teachers.Where(t => t.Status == TeacherStatus.Vacataire).ToList())
             {
@@ -102,11 +122,24 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             var teacher = t as Teacher;
 
             var record = new PayrollRecord { Teacher = teacher, HoursCount = 0, Rate = teacher.Rate, Payroll = _payroll, Retenu = 0.15 };
+            if (_payroll.Records == null)
+            {
+                _payroll.Records = new List<PayrollRecord>();
+            }
             _payroll.Records.Add(record);
             if (_payroll.Records.FirstOrDefault(r => r.TeacherId == teacher.Id) == null)
             {
                 context.PayrollRecords.Add(record);
                 context.SaveChanges();
+            }
+            
+            if (teacher.Status == TeacherStatus.Permanent)
+            {
+                return;
+            }
+            if (_payrollRecords == null)
+            {
+                _payrollRecords = new ObservableCollection<PayrollRecordViewModel>();
             }
             _payrollRecords.Add(PayrollRecordViewModel.FromPayrollRecord(record));
             
@@ -153,18 +186,19 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             {
                 context.Attach(recordVM.Record);
                 context.Entry(recordVM.Record).State = EntityState.Modified;
+
+                App.ServiceProvider.GetService<PayslipViewModel>().UpdatePayrollRecord(recordVM.Record);
             }
 
             context.SaveChanges();
 
-            App.ServiceProvider.GetService<PayslipViewModel>().UpdateContext();
 
             MessageBox.Show("Fiche de pointage enregistré");
         }
 
         public void AddTeacherDisptach(object teacher)
         {
-            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new ParameterizedThreadStart(AddTeacherPayrollRecord), teacher);
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, new ParameterizedThreadStart(AddTeacherPayrollRecord), teacher);
         }
 
 
@@ -202,8 +236,11 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             {
                 if (_payrollRecords == null)
                 {
-                    _payrollRecords = new ObservableCollection<PayrollRecordViewModel>(
-                        _payroll.Records.Select(r => PayrollRecordViewModel.FromPayrollRecord(r)).ToList());
+                    if (_payroll.Records != null)
+                    {
+                        _payrollRecords = new ObservableCollection<PayrollRecordViewModel>(
+                            _payroll.Records.Select(r => PayrollRecordViewModel.FromPayrollRecord(r)).ToList());
+                    }
                 }
                 return _payrollRecords;
             }

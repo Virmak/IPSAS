@@ -2,6 +2,7 @@
 using System;
 using IPSAS.WPFDesktopUI.ViewModels;
 using IPSAS.Persistence;
+using IPSAS.Application.UseCases;
 
 namespace IPSAS.WPFDesktopUI.Views
 {
@@ -15,13 +16,15 @@ namespace IPSAS.WPFDesktopUI.Views
         private readonly Payroll _payrollWindow;
         private readonly Payslip _payslipWindow;
         private readonly TeachersListViewModel _teachersListVM;
+        private readonly SettingsWindow _settingsWindow;
         private readonly IPSASDbContext _ipsasDbContext;
 
-        public TeachersList(IPSASDbContext dbContext, Payroll payrollWindow, Payslip payslipWindow, TeachersListViewModel teachersListView)
+        public TeachersList(IPSASDbContext dbContext, Payroll payrollWindow, Payslip payslipWindow, TeachersListViewModel teachersListView, SettingsWindow settingsWindow)
         {
             InitializeComponent();
             _ipsasDbContext = dbContext;
             _teachersListVM = teachersListView;
+            _settingsWindow = settingsWindow;
             _payslipWindow = payslipWindow;
             _payrollWindow = payrollWindow;
 
@@ -57,8 +60,6 @@ namespace IPSAS.WPFDesktopUI.Views
 
         private void FichePointageClick(object sender, RoutedEventArgs e)
         {
-            //Messenger.Default.Send(new TeacherAddedMessage()); // Send new teacher to Payroll and TeacherList ViewModels
-
             _payrollWindow.Show();
             _payrollWindow.Focus();
         }
@@ -85,6 +86,12 @@ namespace IPSAS.WPFDesktopUI.Views
         {
             _payslipWindow.Show();
             _payslipWindow.Focus();
+        }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            _settingsWindow.Show();
+            _settingsWindow.Focus();
         }
     }
 }

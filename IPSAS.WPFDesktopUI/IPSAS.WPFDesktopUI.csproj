@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\fiche_paie.pdf" />
     <None Remove="Resources\ipsas_logo.png" />
   </ItemGroup>
 
@@ -19,14 +20,19 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.0.0" />
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="3.0.22" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\IPSAS.Application\IPSAS.Application.csproj" />
     <ProjectReference Include="..\IPSAS.Domain\IPSAS.Domain.csproj" />
     <ProjectReference Include="..\IPSAS.Persistence\IPSAS.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\fiche_paie.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <Resource Include="Resources\ipsas_logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

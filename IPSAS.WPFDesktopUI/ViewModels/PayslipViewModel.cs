@@ -1,6 +1,9 @@
-﻿using IPSAS.Domain.Entities;
+﻿using IPSAS.Application.UseCases;
+using IPSAS.Domain.Entities;
 using IPSAS.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -49,6 +52,8 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         private ICommand _resetSearchCommand;
         private ICommand _searchCommand;
         private ICommand _savePayslip;
+        private ICommand _deletePayslipCommand;
+        private ICommand _printPayslipCommand;
 
         public List<string> Months => _monthsList;
         public List<string> Years => _yearsList;
@@ -94,6 +99,11 @@ namespace IPSAS.WPFDesktopUI.ViewModels
 
         private void FilterTeachers()
         {
+            if (!_teacherFilterEnabled)
+            {
+                return;
+            }
+
             if (_matricule == "" && _firstName == "" && _lastName == ""
                 && _grade == -1 && _status == -1 && _contractType == -1)
             {
@@ -144,6 +154,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
         public ICommand ResetSearchCommand => _resetSearchCommand ?? (_resetSearchCommand = new CommandHandler(
                     () =>
                     {
+                        _teacherFilterEnabled = false;
                         Matricule = "";
                         FirstName = "";
                         LastName = "";
@@ -151,13 +162,9 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                         Status = -1;
                         ContractType = -1;
                         SelectedTeacher = null;
-
-                        HoursCount = 0;
-                        HourlyRate = 0;
-                        GrossPay = 0;
-                        PaymentType = -1;
-                        PaymentDate = DateTime.Now;
-                        Bank = "";
+                        
+                        ResetPayslipFields();
+                        _teacherFilterEnabled = true;
                         FilterTeachers();
                         return true;
                     },
@@ -177,9 +184,9 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                         MessageBox.Show("Veuillez sélectionner un enseignant", "Erreur", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         return false;
                     }
-                    if (_paymentType != (int)Domain.Entities.PaymentType.Cash && _bank == "")
+                    if (_paymentType != (int)Domain.Entities.PaymentType.Cash && _bank == "" && _paymentDetails == "")
                     {
-                        MessageBox.Show("Veuillez entrer le référence du paiement", "Erreur", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        MessageBox.Show("Veuillez entrer la référence / numéro du chèque", "Erreur", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         return false;
                     }
 
@@ -207,6 +214,13 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                         payslip.Payment.PaymentType = (PaymentType)PaymentType;
                         payslip.Payment.Reference = PaymentDetails;
                     }
+
+
+                    _selectedPayrollRecord.HoursCount = _hoursCount;
+                    GrossPay = _selectedPayrollRecord.GrossPay;
+                    NetSalary = _selectedPayrollRecord.Net;
+
+                    _dbContext.Entry(_selectedPayrollRecord).State = EntityState.Modified;
                     _dbContext.SaveChanges();
 
                     MessageBox.Show("Fiche de de paie enregistré avec succès", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -214,6 +228,67 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                     return true;
                 },
                 () => true ));
+
+        public ICommand DeletePayslipCommand => _deletePayslipCommand ?? (_deletePayslipCommand = new CommandHandler(
+                    () =>
+                    {
+                        var response = MessageBox.Show(
+                            "Voulez-vous vraiment supprimer la fiche de la paie de  " + _selectedTeacher.FullName, 
+                            "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) ;
+                        if (response == MessageBoxResult.Yes)
+                        {
+                            var payslip = _dbContext.Payslips.FirstOrDefault(p => p.Teacher.Id == _selectedTeacher.Id && p.MonthlyPayroll.Id == _payroll.Id);
+                            if (payslip != null)
+                            {
+                                DeletePayslip(payslip);
+                                ResetPayslipFields();
+                            }
+                        }
+
+                        return true;
+                    },
+                    () => true));
+        public ICommand PrintPayslipCommand => _printPayslipCommand ?? (_printPayslipCommand = new CommandHandler(
+                    () =>
+                    {
+                        if (_selectedTeacher == null)
+                        {
+                            MessageBox.Show("Veuillez sélectinner un enseignant");
+                            return false;
+                        } else if (_payslip == null || _selectedPayrollRecord == null)
+                        {
+                            MessageBox.Show("Veuillez enregistrer la fiche de paie avant de l'imprimmer");
+                            return false;
+                        }
+                        PayslipPdfGenerator payslipPdf = new PayslipPdfGenerator();
+                        SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+                        saveFileDialog1.Filter = "Fichier PDF|*.pdf";
+                        saveFileDialog1.Title = "Emplacement";
+                        saveFileDialog1.ShowDialog();
+
+                        // If the file name is not an empty string open it for saving.
+                        if (saveFileDialog1.FileName != "")
+                        {
+                            try
+                            {
+                                payslipPdf.Generate(_selectedTeacher, _payslip, _selectedPayrollRecord, saveFileDialog1.FileName);
+                            } 
+                            catch(Exception e)
+                            {
+                                MessageBox.Show("Veuillez fermer le fichier PDF et réessayez");
+                            } 
+                        }
+
+
+                        return true;
+                    },
+        () => true));
+
+        public void DeletePayslip(Payslip payslip)
+        {
+            _dbContext.Remove(payslip);
+            _dbContext.SaveChanges();
+        }
 
         internal void AddTeacher(Teacher teacher)
         {
@@ -261,8 +336,21 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (value != _hoursCount)
                 {
                     _hoursCount = value;
+                    if (_selectedTeacher.Status == TeacherStatus.Vacataire)
+                    {
+                        GrossPay = _selectedTeacher.Rate * _hoursCount;
+                        NetSalary = GrossPay * 0.85;
+                    }
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HoursCount)));
                 }
-                PropertyChanged(this, new PropertyChangedEventArgs(nameof(HoursCount)));
+            }
+        }
+
+        public bool HoursCountEnabled 
+        {
+            get
+            {
+                return _selectedTeacher?.Status == TeacherStatus.Vacataire;
             }
         }
         public double HourlyRate 
@@ -382,6 +470,8 @@ namespace IPSAS.WPFDesktopUI.ViewModels
             set { }
         }
 
+        private bool _teacherFilterEnabled = true;
+
         public string Matricule 
         {
             get
@@ -393,6 +483,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (_matricule != value)
                 {
                     _matricule = value;
+                    FilterTeachers();
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(Matricule)));
                 }
             }
@@ -409,6 +500,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (_firstName != value)
                 {
                     _firstName = value;
+                    FilterTeachers();
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(FirstName)));
                 }
             }
@@ -425,6 +517,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (_lastName != value)
                 {
                     _lastName = value;
+                    FilterTeachers();
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(LastName)));
                 }
             }
@@ -441,6 +534,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (value != _grade)
                 {
                     _grade = value;
+                    FilterTeachers();
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(Grade)));
                 }
             }
@@ -457,6 +551,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (value != _status)
                 {
                     _status = value;
+                    FilterTeachers();
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(Status)));
                 }
             }
@@ -473,8 +568,41 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 if (value != _contractType)
                 {
                     _contractType = value;
+                    FilterTeachers();
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(ContractType)));
                 }
+            }
+        }
+
+        public bool ContractTypeEnabled
+        {
+            get
+            {
+                if (_selectedTeacher == null)
+                {
+                    return true;
+                } 
+                else
+                {
+                    return _selectedTeacher.Status == TeacherStatus.Permanent;
+                }
+            }
+            set
+            {
+
+            }
+        }
+
+        internal void UpdatePayrollRecord(PayrollRecord record)
+        {
+            if (_selectedPayrollRecord.Id == record.Id)
+            {
+                _selectedPayrollRecord = record;
+
+                GrossPay = _selectedPayrollRecord.GrossPay;
+                NetSalary = _selectedPayrollRecord.Net;
+                HoursCount = _selectedPayrollRecord.HoursCount;
+
             }
         }
 
@@ -491,16 +619,18 @@ namespace IPSAS.WPFDesktopUI.ViewModels
 
                     _payroll = _dbContext.MonthlyPayrolls.FirstOrDefault(p => p.Month == _selectedMonth && p.AcademicYear == _yearsList[_selectedYear]);
 
-                    _selectedPayrollRecord = _selectedTeacher?.PayrollRecords
-                        .FirstOrDefault(pr => pr.Payroll.Month == _selectedMonth && pr.Payroll.AcademicYear == _yearsList[_selectedYear]);
+                    if (_payroll == null)
+                    {
+                        ResetPayslipFields();
+                    }
+                    else
+                    {
+                        _selectedPayrollRecord = _selectedTeacher?.PayrollRecords
+                            .FirstOrDefault(pr => pr.Payroll.Month == _selectedMonth && pr.Payroll.AcademicYear == _yearsList[_selectedYear]);
+                    }
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(SelectedMonth)));
                 }
             }
-        }
-
-        internal void UpdateContext()
-        {
-            var context = _dbContext.PayrollRecords;
         }
 
         public int SelectedYear 
@@ -516,6 +646,11 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                     _selectedYear = value;
 
                     _payroll = _dbContext.MonthlyPayrolls.FirstOrDefault(p => p.Month == _selectedMonth && p.AcademicYear == _yearsList[_selectedYear]);
+
+                    if (_payroll == null)
+                    {
+                        ResetPayslipFields();
+                    }
 
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(SelectedYear)));
                 }
@@ -549,6 +684,7 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                 {
                     _selectedTeacher = value;
                     PropertyChanged(this, new PropertyChangedEventArgs(nameof(SelectedTeacher)));
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(ContractTypeEnabled)));
 
                     if (_selectedTeacher == null)
                     {
@@ -569,17 +705,37 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                             Bank = Payslip.Payment.Bank;
                         } else
                         {
-                            PaymentDate = DateTime.Now;
-                            PaymentType = -1;
-                            PaymentDetails = "";
-                            Bank = "";
+                            ResetPayslipFields();
                         }
-                    } else
+                    } 
+                    else
                     {
-                        PaymentType = -1;
+                        ResetPayslipFields();
                     }
 
-                    _selectedPayrollRecord = _selectedTeacher.PayrollRecords.FirstOrDefault(pr => pr.PayrollId == _payroll.Id);
+
+                    if (_payroll != null)
+                    {
+                        _selectedPayrollRecord = _dbContext.PayrollRecords
+                            .FirstOrDefault(pr => pr.PayrollId == _payroll.Id && pr.TeacherId == _selectedTeacher.Id);
+                        if (_selectedPayrollRecord == null)
+                        {
+                            _selectedPayrollRecord = new PayrollRecord()
+                            {
+                                Teacher = _selectedTeacher,
+                                HoursCount = 0,
+                                Payroll = _payroll,
+                                PayrollId = _payroll.Id,
+                                TeacherId = _selectedTeacher.Id
+                            };
+                        }
+                    } 
+                    else
+                    {
+                        var payrollVM = App.ServiceProvider.GetService<PayrollViewModel>();
+                        payrollVM.CreatePayroll(_selectedMonth, _yearsList[_selectedYear]);
+                        _payroll = payrollVM.SelectedPayroll;
+                    }
 
                     PaymentType = Payslip != null && Payslip.Payment != null ? (int)Payslip.Payment.PaymentType : -1;
                     HourlyRate = _selectedTeacher.Rate;
@@ -595,6 +751,8 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                         GrossPay = _selectedTeacher.GrossPay;
                     }
 
+                    _teacherFilterEnabled = false;
+
                     Matricule = _selectedTeacher.Id.ToString();
                     FirstName = _selectedTeacher.FirstName;
                     LastName = _selectedTeacher.LastName;
@@ -609,8 +767,22 @@ namespace IPSAS.WPFDesktopUI.ViewModels
                     {
                         ContractType = (int)_selectedTeacher.ContractType;
                     }
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HoursCountEnabled)));
+                    
+                    _teacherFilterEnabled = true;
                 }
             }
+        }
+        public void ResetPayslipFields()
+        {
+            HoursCount = 0;
+            HourlyRate = 0;
+            GrossPay = 0;
+            PaymentDate = DateTime.Now;
+            PaymentType = -1;
+            PaymentDetails = "";
+            Bank = "";
+            NetSalary = 0;
         }
     }
 }

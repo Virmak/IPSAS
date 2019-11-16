@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace IPSAS.Persistence.Migrations
 {
-    public partial class IntitalCreate : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -18,6 +19,38 @@ namespace IPSAS.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MonthlyPayrolls", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Bank = table.Column<string>(nullable: true),
+                    Amount = table.Column<double>(nullable: false),
+                    PaymentDate = table.Column<DateTime>(nullable: false),
+                    PaymentType = table.Column<int>(nullable: false),
+                    Reference = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Remunerations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Grade = table.Column<int>(nullable: false),
+                    HourlyRate = table.Column<double>(nullable: false),
+                    Salary = table.Column<double>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Remunerations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -71,6 +104,39 @@ namespace IPSAS.Persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Payslips",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MonthlyPayrollId = table.Column<int>(nullable: true),
+                    TeacherId = table.Column<int>(nullable: true),
+                    PaymentId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payslips", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payslips_MonthlyPayrolls_MonthlyPayrollId",
+                        column: x => x.MonthlyPayrollId,
+                        principalTable: "MonthlyPayrolls",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Payslips_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Payslips_Teachers_TeacherId",
+                        column: x => x.TeacherId,
+                        principalTable: "Teachers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_PayrollRecords_PayrollId",
                 table: "PayrollRecords",
@@ -81,6 +147,21 @@ namespace IPSAS.Persistence.Migrations
                 table: "PayrollRecords",
                 columns: new[] { "TeacherId", "PayrollId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payslips_MonthlyPayrollId",
+                table: "Payslips",
+                column: "MonthlyPayrollId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payslips_PaymentId",
+                table: "Payslips",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payslips_TeacherId",
+                table: "Payslips",
+                column: "TeacherId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Teachers_CIN",
@@ -96,7 +177,16 @@ namespace IPSAS.Persistence.Migrations
                 name: "PayrollRecords");
 
             migrationBuilder.DropTable(
+                name: "Payslips");
+
+            migrationBuilder.DropTable(
+                name: "Remunerations");
+
+            migrationBuilder.DropTable(
                 name: "MonthlyPayrolls");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "Teachers");

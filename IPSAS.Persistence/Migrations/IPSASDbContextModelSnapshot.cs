@@ -123,6 +123,27 @@ namespace IPSAS.Persistence.Migrations
                     b.ToTable("Payslips");
                 });
 
+            modelBuilder.Entity("IPSAS.Domain.Entities.Remuneration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Grade")
+                        .HasColumnType("int");
+
+                    b.Property<double>("HourlyRate")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Salary")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Remunerations");
+                });
+
             modelBuilder.Entity("IPSAS.Domain.Entities.Teacher", b =>
                 {
                     b.Property<int>("Id")

@@ -1,0 +1,40 @@
+﻿<Window x:Class="IPSAS.WPFDesktopUI.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IPSAS.WPFDesktopUI.Views"
+        mc:Ignorable="d"
+        Title="IPSAS | Paramètres" Height="257" Width="590">
+    <Border Padding="10">
+        <DockPanel VerticalAlignment="Top">
+            <TextBlock Text="Paramètres"
+                       DockPanel.Dock="Top"
+                       FontWeight="Bold" 
+                       Margin="0 10" />
+
+
+            <GroupBox Header="Rémunération"
+                    DockPanel.Dock="Top">
+                <StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Grade" />
+                        <ComboBox SelectedIndex="{Binding SelectedGrade}"  ItemsSource="{Binding GradesList}"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Taux Horaire (Vacataire)" />
+                        <TextBox Text="{Binding HourlyRate}" Padding="2" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Salaire (Permanent)" />
+                        <TextBox Text="{Binding Salary}" Padding="2" />
+                    </StackPanel>
+                    <Button Content="Enregistrer"
+                            Command="{Binding SaveRenumerationCommand}"
+                            Margin="0 5 0 0" />
+                </StackPanel>
+            </GroupBox>
+
+        </DockPanel>
+    </Border>
+</Window>

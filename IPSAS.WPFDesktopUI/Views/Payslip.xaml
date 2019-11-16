@@ -4,10 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IPSAS.WPFDesktopUI.Views"
+        xmlns:converters="clr-namespace:IPSAS.WPFDesktopUI.Converters"
         mc:Ignorable="d"
         Closing="Window_Closing"
         Title="Gestion de la paie" Height="650" Width="800">
-
+    
+    <Window.Resources>
+        <converters:ContractTypeEnabledConverter x:Key="ContractTypeEnabledConverter" />
+    </Window.Resources>
     <Border Padding="10">
         <!-- Search Panel-->
         <DockPanel VerticalAlignment="Stretch">
@@ -24,35 +28,6 @@
                         <RowDefinition Height="*"></RowDefinition>
                         <RowDefinition Height="1.8*"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <!--<GroupBox Header="Enseignant" DataContext="{Binding SelectedTeacher}">
-                        <StackPanel>
-                            <StackPanel Margin="4">
-                                <TextBlock Text="Matricule" />
-                                <TextBox  Text="{Binding Id}" IsEnabled="False" Padding="2"></TextBox>
-                            </StackPanel>
-
-                            <StackPanel Margin="4">
-                                <TextBlock Text="Nom &amp; prénom" />
-                                <TextBox Text="{Binding FullName}"  IsEnabled="False" Padding="2"></TextBox>
-                            </StackPanel>
-
-                            <StackPanel Margin="4">
-                                <TextBlock Text="Grade" />
-                                <TextBox Text="{Binding Grade}"  IsEnabled="False" Padding="2"></TextBox>
-                            </StackPanel>
-
-                            <StackPanel Margin="4">
-                                <TextBlock Text="Statut" />
-                                <TextBox  Text="{Binding Status}" IsEnabled="False" Padding="2"></TextBox>
-                            </StackPanel>
-
-                            <StackPanel Margin="4">
-                                <TextBlock  Text="Type de contrat" />
-                                <TextBox Text="{Binding ContractType}" IsEnabled="False" Padding="2"></TextBox>
-                            </StackPanel>
-
-                        </StackPanel>
-                    </GroupBox> -->
                     <GroupBox Header="Fiche de la paie"  Grid.Row="0" Grid.RowSpan="2">
                         <DockPanel LastChildFill="False">
 
@@ -70,7 +45,7 @@
                            
                             <StackPanel DockPanel.Dock="Top" Margin="4">
                                 <TextBlock Text="Nombre d'heures" />
-                                <TextBox Text="{Binding HoursCount}" IsEnabled="False" Padding="2"></TextBox>
+                                <TextBox Text="{Binding HoursCount}" IsEnabled="{Binding HoursCountEnabled}" Padding="2"></TextBox>
                             </StackPanel>
 
                             <StackPanel DockPanel.Dock="Top" Margin="4">
@@ -173,9 +148,13 @@
 
                                 <StackPanel Margin="4" Grid.Column="2" Grid.Row="1">
                                     <TextBlock  Text="Type de contrat" />
-                                    <ComboBox SelectedIndex="{Binding ContractType}" ItemsSource="{Binding ContractTypes}"/>
+                                    <ComboBox 
+                                        SelectedIndex="{Binding ContractType}" 
+                                        ItemsSource="{Binding ContractTypes}"
+                                        IsEnabled="{Binding ContractTypeEnabled}"/>
                                 </StackPanel>
 
+                                <Button Command="{Binding PrintAllCommand}" Content="Imprimer tout" Grid.Column="0" Grid.Row="2" Margin="5"></Button>
 
                                 <Button Command="{Binding ResetSearchCommand}" Content="Annuler" Grid.Column="1" Grid.Row="2" Margin="5"></Button>
 
